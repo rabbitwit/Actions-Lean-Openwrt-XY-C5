@@ -14,7 +14,7 @@
 >- [Passwall](https://github.com/kenzok8/openwrt-packages/tree/master/luci-app-passwall)(支持xray)
 >- UPnP
 >- KMS
->- 动态 DNS
+>- 动态 DNS (支持 阿里 DNSpod Cloudflare-V4)
 >- 网络唤醒
 >- Argon 主题
 >- Transmission
