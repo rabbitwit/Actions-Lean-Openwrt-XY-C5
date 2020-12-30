@@ -11,7 +11,7 @@
 >- IPv6支持
 >- SmartDNS
 >- [SSR(Helloworld)](https://github.com/fw876/helloworld)
->- [Passwall](https://github.com/kenzok8/openwrt-packages/tree/master/luci-app-passwall)
+>- [Passwall](https://github.com/kenzok8/openwrt-packages/tree/master/luci-app-passwall)(支持xray)
 >- UPnP
 >- KMS
 >- 动态 DNS
