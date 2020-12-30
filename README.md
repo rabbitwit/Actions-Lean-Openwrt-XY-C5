@@ -4,7 +4,7 @@
 - Github Actions来自于[P3TERX/Actions-OpenWrt](https://github.com/P3TERX/Actions-OpenWrt)，[中文教程](https://p3terx.com/archives/build-openwrt-with-github-actions.html)。
 - 编译目标为小娱路由XY-C5
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/rabbitwit/test-xiaoyu?style=for-the-badge&label=Download)](https://github.com/Ljzkirito/Actions-Openwrt-XY-C5/releases/latest)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/rabbitwit/test-xiaoyu?style=for-the-badge&label=Download)](https://github.com/rabbitwit/test-xiaoyu/releases/latest)
 ## 编译固件配置说明
 
 ### 固件包含以下插件
