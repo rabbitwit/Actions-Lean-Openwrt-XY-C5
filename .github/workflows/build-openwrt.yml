@@ -120,7 +120,6 @@ jobs:
       id: ipk
       if: (!cancelled())
       run: |
-        cp openwrt/bin/packages/*/*/*ssr-plus*.ipk openwrt/bin/targets/*/*/ || true
         cp openwrt/bin/packages/*/*/*passwall*.ipk openwrt/bin/targets/*/*/ || true
         cp openwrt/bin/packages/*/*/xray*.ipk openwrt/bin/targets/*/*/ || true
     - name: Organize files
@@ -176,7 +175,6 @@ jobs:
         body_path: release.txt
         files: |
           ${{ env.FIRMWARE }}/*sysupgrade.bin
-          ${{ env.FIRMWARE }}/*ssr-plus*.ipk
           ${{ env.FIRMWARE }}/*passwall*.ipk
           ${{ env.FIRMWARE }}/xray*.ipk
     - name: Delete workflow runs
