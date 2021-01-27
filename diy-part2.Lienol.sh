@@ -16,7 +16,5 @@ sed -i 's/192.168.1.1/10.10.10.1/g' package/base-files/files/bin/config_generate
 sed -i "s/OpenWrt/Rabbit build $(TZ=UTC-8 date "+%y.%m.%d") @/g" package/lean/default-settings/files/zzz-default-settings
 # 设置密码为空（安装固件时无需密码登陆，然后自己修改想要的密码）
 sed -i 's@.*CYXluq4wUazHjmCDBCqXF*@#&@g' package/lean/default-settings/files/zzz-default-settings
-# let pdnsd filter aaaa
-mv $GITHUB_WORKSPACE/pdnsd-patch $GITHUB_WORKSPACE/openwrt/feeds/diy1/pdnsd-alt/patches
 # 修改 argon 为默认主题
 sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
