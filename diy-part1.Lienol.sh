@@ -22,3 +22,6 @@ sed -i '$a src-git passwall https://github.com/xiaorouji/openwrt-passwall' feeds
 
 # 获取luci-app-smartdns
 svn co https://github.com/kenzok8/openwrt-packages/trunk/luci-app-smartdns package/lean/luci-app-smartdns
+
+# Remove UnblockNeteaseMusicGo upx commands
+sed -i "/upx/d" package/lean/UnblockNeteaseMusicGo/Makefile || true
