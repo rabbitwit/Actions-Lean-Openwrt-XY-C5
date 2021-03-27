@@ -1,6 +1,9 @@
 #
 # Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
 #
+#
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
 # This is free software, licensed under the MIT License.
 # See /LICENSE for more information.
 #
@@ -18,9 +21,11 @@ on:
         description: 'SSH connection to Actions'
         required: false
         default: 'false'
+  schedule:
+     - cron: 0 4 * * 5
 
 env:
-  REPO_URL: https://github.com/Lienol/openwrt.git
+  REPO_URL: https://github.com/Lienol/openwrt
   REPO_BRANCH: 19.07
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .Lienol.config
@@ -29,14 +34,13 @@ env:
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
-  UPLOAD_WETRANSFER: true
+  UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
 
 jobs:
-  build:
+  Compile:
     runs-on: ubuntu-18.04
-
     steps:
     - name: Checkout
       uses: actions/checkout@main
@@ -47,7 +51,7 @@ jobs:
       run: |
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
+        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
@@ -58,10 +62,10 @@ jobs:
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /workdir/openwrt19 $GITHUB_WORKSPACE/openwrt19
     - name: Load custom feeds
       run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt19/feeds.conf.default
         chmod +x $DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
@@ -73,8 +77,8 @@ jobs:
 
     - name: Load custom configuration
       run: |
-        [ -e files ] && mv files openwrt/files
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        [ -e files ] && mv files openwrt19/files
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt19/.config
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
@@ -95,30 +99,37 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
     - name: Compile the firmware
       id: compile
+      if: (!cancelled())
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s
+        make -j$(nproc) || make -j1 V=s
         echo "::set-output name=status::success"
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        echo "FILE_DATE=_$(date +"%Y%m%d")" >> $GITHUB_ENV
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
 
     - name: Upload bin directory
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true' && !cancelled()
       with:
-        name: Lienol_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
+        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: openwrt19/bin
 
+    - name: Upload some ipk
+      id: ipk
+      if: (!cancelled())
+      run: |
+        cp openwrt19/bin/packages/*/*/*passwall*.ipk openwrt19/bin/targets/*/*/ || true
+        cp openwrt19/bin/packages/*/*/xray*.ipk openwrt19/bin/targets/*/*/ || true
     - name: Organize files
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
-        cd openwrt/bin/targets/*/*
+        cd openwrt19/bin/targets/*/*
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "::set-output name=status::success"
@@ -126,7 +137,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: Lienol_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
     - name: Upload firmware to cowtransfer
@@ -151,8 +162,11 @@ jobs:
       run: |
         echo "::set-output name=release_tag::$(date +"%Y.%m.%d-%H%M")"
         touch release.txt
-        [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
-        [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
+        echo "## Lean's Openwrt Release $(date +"%Y.%m.%d-%H:%M")" >> release.txt
+        echo "- squashfs-sysupgrade.bin" >> release.txt
+        echo "  sha256: $(cat ${{ env.FIRMWARE }}/sha256sums | grep -oE ".*sysupgrade.bin" | grep -oE "\w{64}")" >> release.txt
+        [ $UPLOAD_COWTRANSFER = true ] && echo "- 🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
+        [ $UPLOAD_WETRANSFER = true ] && echo "- 🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
         echo "::set-output name=status::success"
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
@@ -162,16 +176,21 @@ jobs:
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
-        files: ${{ env.FIRMWARE }}/*sysupgrade.bin
-
+        files: |
+          ${{ env.FIRMWARE }}/*sysupgrade.bin
+          ${{ env.FIRMWARE }}/*passwall*.ipk
+          ${{ env.FIRMWARE }}/xray*.ipk
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
+      if: (!cancelled())
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
         retain_days: 1
         keep_minimum_runs: 3
 
     - name: Remove old Releases
-      uses: dev-drprasad/delete-older-releases@v0.1.0
+      uses: dev-drprasad/delete-older-releases@v0.2.0
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
         keep_latest: 3
