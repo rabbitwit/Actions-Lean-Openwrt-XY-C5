@@ -25,7 +25,7 @@ on:
      - cron: 0 4 * * 5
 
 env:
-  REPO_URL: https://github.com/Lienol/openwrt
+  REPO_URL: https://github.com/Lienol/openwrt.git
   REPO_BRANCH: 19.07
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .Lienol.config
