@@ -162,7 +162,7 @@ jobs:
       run: |
         echo "::set-output name=release_tag::$(date +"%Y.%m.%d-%H%M")"
         touch release.txt
-        echo "## Lean's Openwrt Release $(date +"%Y.%m.%d-%H:%M")" >> release.txt
+        echo "## Lienol Openwrt Release $(date +"%Y.%m.%d-%H:%M")" >> release.txt
         echo "- squashfs-sysupgrade.bin" >> release.txt
         echo "  sha256: $(cat ${{ env.FIRMWARE }}/sha256sums | grep -oE ".*sysupgrade.bin" | grep -oE "\w{64}")" >> release.txt
         [ $UPLOAD_COWTRANSFER = true ] && echo "- 🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
