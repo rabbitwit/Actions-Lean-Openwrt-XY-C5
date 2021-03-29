@@ -1,6 +1,6 @@
 # Github Actions Lean Openwrt XY-C5
 
-- Openwrt源码是[coolsnowwolf/lede](https://github.com/coolsnowwolf/lede)&[Lienol/openwrt](https://github.com/Lienol/openwrt)。
+- Openwrt源码是[coolsnowwolf/lede](https://github.com/coolsnowwolf/lede)。
 - Github Actions来自于[P3TERX/Actions-OpenWrt](https://github.com/P3TERX/Actions-OpenWrt)，[中文教程](https://p3terx.com/archives/build-openwrt-with-github-actions.html)。
 - 编译目标为小娱路由XY-C5
 
@@ -10,15 +10,16 @@
 ### 固件包含以下插件
 >- IPv6支持
 >- SmartDNS
->- [SSR(Helloworld)](https://github.com/fw876/helloworld)
 >- [Passwall](https://github.com/kenzok8/openwrt-packages/tree/master/luci-app-passwall)(支持xray)
 >- UPnP
 >- KMS
+>- FTP
 >- 动态 DNS (支持 阿里 DNSpod Cloudflare-V4)
 >- 网络唤醒
 >- Argon 主题
 >- Transmission
->- 支持USB挂载
+>- 支持自动USB挂载
+>- SATA硬盘我编译了，但是我没硬盘去测试
 
 ## Config文件生成参考
 
