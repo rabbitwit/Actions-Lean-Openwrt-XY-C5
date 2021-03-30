@@ -13,5 +13,7 @@
 # 修改openwrt-luci为18.06分支
 #sed -i 's/17.01/18.06/g' feeds.conf.default
 
+sed -i '$a src-git passwall https://github.com/xiaorouji/openwrt-passwall' feeds.conf.default
+
 # 拉取最新版argon主题
 git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git package/lean/luci-theme-argon
